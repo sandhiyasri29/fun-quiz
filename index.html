@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Vibe Check Notification Quiz</title>
+<style>
+  body {
+    margin: 0;
+    height: 100vh;
+    background: url('https://images.unsplash.com/photo-1573642304659-7be7b3bf7d8c?auto=format&fit=crop&w=1470&q=80') no-repeat center center/cover;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #fff;
+    overflow-x: hidden;
+  }
+
+  #notification {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 340px;
+    background: rgba(0,0,0,0.9);
+    border-radius: 16px;
+    box-shadow: 0 8px 25px #ff7f50cc;
+    padding: 22px 28px;
+    font-size: 1.15rem;
+    user-select: none;
+    z-index: 9999;
+    animation: slideIn 0.6s ease forwards;
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateX(100%) translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0) translateY(0);
+    }
+  }
+
+  #question {
+    margin: 0 0 18px 0;
+    font-weight: 700;
+    color: #ff6f00;
+    text-shadow: 0 0 10px #ff6f00cc;
+    opacity: 1;
+    transition: opacity 0.5s ease;
+  }
+
+  #options {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  #options button {
+    flex: 1;
+    margin: 0 7px;
+    padding: 14px 0;
+    border: none;
+    border-radius: 40px;
+    font-weight: 700;
+    font-size: 1.05rem;
+    cursor: pointer;
+    background: linear-gradient(45deg, #ff9100, #ff3d00);
+    color: #fff;
+    box-shadow: 0 5px 15px #ff6f0033;
+    transition: background 0.3s ease, transform 0.3s ease;
+    user-select: none;
+  }
+
+  #options button:hover {
+    background: linear-gradient(45deg, #ff3d00, #ff9100);
+    transform: scale(1.15) rotate(5deg);
+    box-shadow: 0 8px 20px #ff6f00dd;
+  }
+
+  #options button:active {
+    transform: scale(0.95) rotate(0deg);
+    box-shadow: 0 3px 10px #ff6f0033;
+  }
+
+  #final-message {
+    margin-top: 20px;
+    font-size: 1.4rem;
+    color: #ffe066;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+    font-weight: 800;
+    text-shadow: 0 0 10px #ffa500cc;
+    position: relative;
+  }
+
+  #cheers-emoji {
+    font-size: 72px;
+    margin: 12px 0;
+    text-shadow: 0 0 15px #ff7f50;
+    animation: popBounce 1.3s ease forwards;
+  }
+
+  @keyframes popBounce {
+    0%   { transform: scale(0.3); opacity: 0; }
+    50%  { transform: scale(1.2); opacity: 1; }
+    70%  { transform: scale(0.9); }
+    100% { transform: scale(1); }
+  }
+
+  .hidden {
+    opacity: 0 !important;
+    pointer-events: none;
+  }
+
+  /* Confetti styles */
+  #confetti-canvas {
+    pointer-events: none;
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    z-index: 10000;
+  }
+
+  /* Mute button */
+  #mute-btn {
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    background: #ff6f00;
+    border: none;
+    border-radius: 20px;
+    padding: 10px 18px;
+    font-weight: 700;
+    cursor: pointer;
+    color: #fff;
+    box-shadow: 0 5px 15px #ff6f0033;
+    user-select: none;
+    z-index: 10001;
+    transition: background 0.3s ease;
+  }
+
+  #mute-btn:hover {
+    background: #ff3d00;
+  }
+</style>
+</head>
+<body>
+
+<div id="notification" role="alert" aria-live="assertive">
+  <h3 id="question"></h3>
+  <div id="options"></div>
+  <div id="final-message" class="hidden">
+    <div id="cheers-emoji">🍻✨</div>
+    <div id="final-text"></div>
+  </div>
+</div>
+
+<canvas id="confetti-canvas"></canvas>
+
+<button id="mute-btn" aria-label="Mute or unmute background music">🔊 Mute</button>
+
+<audio id="clickSound" src="https://freesound.org/data/previews/522/522612_2730847-lq.mp3" preload="auto"></audio>
+<audio id="bgMusic" src="https://cdn.pixabay.com/download/audio/2022/03/21/audio_8aafee43b2.mp3?filename=happy-upbeat-pop-ambient-8827.mp3" preload="auto" loop></audio>
+
+<script>
+  const questions = [
+    {
+      text: "Heyyyy, real talk — do you like me? 🤔",
+      options: [
+        { text: "Yasss, duh! 😍", next: 1 },
+        { text: "100% Absolutely Yes! 🔥", next: 1 }
+      ]
+    },
+    {
+      text: "What’s the vibe you dig most about me? 💭",
+      options: [
+        { text: "That killer smile 😁", next: 2 },
+        { text: "The LOLs & giggles 😂", next: 2 }
+      ]
+    },
+    {
+      text: "Choose our next hangout spot, no cap: 🌴🍹",
+      options: [
+        { text: "Beach, let’s catch those waves! 🏖️", next: 3 },
+        { text: "Hit the bar for some lit vibes 🍸", next: 3 }
+      ]
+    },
+    {
+      text: "Alright, what you really want from me? 👀",
+      options: [
+        { text: "A smooch 💋", next: 4 },
+        { text: "A big cozy hug 🤗", next: 4 }
+      ]
+    },
+    {
+      text: "Just for fun, when’s our next liquor sleepover? 🍻😜",
+      options: []
+    }
+  ];
+
+  const questionEl = document.getElementById('question');
+  const optionsEl = document.getElementById('options');
+  const finalMessageEl = document.getElementById('final-message');
+  const finalTextEl = document.getElementById('final-text');
+  const clickSound = document.getElementById('clickSound');
+  const bgMusic = document.getElementById('bgMusic');
+  const muteBtn = document.getElementById('mute-btn');
+
+  let currentQ = 0;
+  let musicPlaying = false;
+
+  // Play click sound
+  function playClick() {
+    clickSound.currentTime = 0;
+    clickSound.play();
+  }
+
+  // Toggle background music
+  muteBtn.onclick = () => {
+    if (musicPlaying) {
+      bgMusic.pause();
+      muteBtn.textContent = "🔈 Unmute";
+    } else {
+      bgMusic.play();
+      muteBtn.textContent = "🔊 Mute";
+    }
+    musicPlaying = !musicPlaying;
+  };
+
+  // Confetti code - simple burst animation
+  const confettiCanvas = document.getElementById('confetti-canvas');
+  const ctx = confettiCanvas.getContext('2d');
+  let confettiParticles = [];
+
+  function resizeCanvas() {
+    confettiCanvas.width = window.innerWidth;
+    confettiCanvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  function randomRange(min, max) {
+    return Math.random() * (max - min) + min;
+  }
+
+  class ConfettiParticle {
+    constructor() {
+      this.x = randomRange(0, confettiCanvas.width);
+      this.y = randomRange(-20, -100);
+      this.size = randomRange(7, 12);
+      this.speed = randomRange(2, 5);
+      this.angle = randomRange(0, 2 * Math.PI);
+      this.angularSpeed = randomRange(0.05, 0.1);
+      this.color = `hsl(${randomRange(0, 360)}, 70%, 60%)`;
+    }
+    update() {
+      this.y += this.speed;
+      this.angle += this.angularSpeed;
+      if (this.y > confettiCanvas.height) {
+        this.y = randomRange(-20, -100);
+        this.x = randomRange(0, confettiCanvas.width);
+      }
+    }
+    draw() {
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      ctx.rotate(this.angle);
+      ctx.fillStyle = this.color;
+      ctx.fillRect(-this.size / 2, -this.size / 2, this.size, this.size);
+      ctx.restore();
+    }
+  }
+
+  function createConfetti(num) {
+    confettiParticles = [];
+    for (let i = 0; i < num; i++) {
+      confettiParticles.push(new ConfettiParticle());
+    }
+  }
+
+  function animateConfetti() {
+    ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+    confettiParticles.forEach(p => {
+      p.update();
+      p.draw();
+    });
+    requestAnimationFrame(animateConfetti);
+  }
+
+  // Show questions & options
+  function showQuestion(index) {
+    const q = questions[index];
+
+    // Fade out question & options
+    questionEl.style.opacity = '0';
+    optionsEl.style.opacity = '0';
+
+    setTimeout(() => {
+      if (q.options.length === 0) {
+        // Final message show
+        questionEl.style.display = 'none';
+        optionsEl.style.display = 'none';
+        finalMessageEl.classList.remove('hidden');
+        finalTextEl.textContent = q.text;
+        finalMessageEl.style.opacity = '1';
+
+        // Start confetti celebration
+        createConfetti(150);
+        animateConfetti();
+
+        // Start bg music automatically if not playing
+        if (!musicPlaying) {
+          bgMusic.play();
+          musicPlaying = true;
+          muteBtn.textContent = "🔊 Mute";
+        }
+      } else {
+        // Show question and options
+        finalMessageEl.classList.add('hidden');
+        finalMessageEl.style.opacity = '0';
+        questionEl.style.display = 'block';
+        optionsEl.style.display = 'flex';
+
+        questionEl.textContent = q.text;
+        optionsEl.innerHTML = '';
+
+        q.options.forEach(opt => {
+          const btn = document.createElement('button');
+          btn.textContent = opt.text;
+          btn.onclick = () => {
+            playClick();
+            currentQ = opt.next;
+            showQuestion(currentQ);
+          };
+          optionsEl.appendChild(btn);
+        });
+
+        // Fade in question & options
+        questionEl.style.opacity = '1';
+        optionsEl.style.opacity = '1';
+      }
+    }, 500);
+  }
+
+  // Initial call
+  showQuestion(currentQ);
+</script>
+
+</body>
+</html>
