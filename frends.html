@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>For Lakshana & Keerthana 💛</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      background: url('https://images.unsplash.com/photo-1524650359799-842906ca3f35?auto=format&fit=crop&w=1350&q=80') no-repeat center center fixed;
+      background-size: cover;
+      color: #fff;
+      overflow: hidden;
+    }
+    .container {
+      max-width: 600px;
+      margin: 80px auto;
+      padding: 30px;
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+      animation: fadeIn 1s ease-in;
+    }
+    .question {
+      font-size: 1.6em;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    button {
+      padding: 15px;
+      font-size: 1em;
+      background: #ff79c6;
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    button:hover {
+      transform: scale(1.05);
+      background: #ff92df;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .final-message {
+      font-size: 1.3em;
+      text-align: center;
+      animation: fadeIn 1s ease-in;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="quiz">
+    <div class="question" id="question"></div>
+    <div class="options" id="options"></div>
+  </div>
+  <audio id="clickSound" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio>
+
+  <script>
+    const questions = [
+      {
+        text: "Hey Keerthana & Lakshana 👯‍♀️ Ready for a throwback ride?",
+        options: [
+          { text: "Hell yes 😎", next: 1 },
+          { text: "Always 💖", next: 1 }
+        ]
+      },
+      {
+        text: "Who got us in trouble at school the most?",
+        options: [
+          { text: "Me 🤭", next: 2 },
+          { text: "One of you troublemakers 😜", next: 2 }
+        ]
+      },
+      {
+        text: "Keerthanaaa! On your special day... how are we celebrating in spirit? 🎉",
+        options: [
+          { text: "Virtual hugs & cake 🍰", next: 3 },
+          { text: "Memory lane marathon 🛤️", next: 3 }
+        ]
+      },
+      {
+        text: "What do you miss the most? 💭",
+        options: [
+          { text: "Our nonsense chats 🤪", next: 4 },
+          { text: "My temper over nothing ! 🚶‍♀️", next: 4 }
+        ]
+      },
+      {
+        text: `✨ Happy Birthday Keerthana!! ✨\n\nTo my OGs: Lakshana & Keerthana – even if we haven’t seen each other in forever, not a day goes by without thinking of you both.\n\nCheers to sleepovers, secrets, and unbreakable bonds. ❤️\n\nForever yours, Sandhiya 💛`,
+        options: []
+      }
+    ];
+
+    const questionEl = document.getElementById('question');
+    const optionsEl = document.getElementById('options');
+    const sound = document.getElementById('clickSound');
+
+    let currentIndex = 0;
+
+    function playSound() {
+      sound.currentTime = 0;
+      sound.play();
+    }
+
+    function renderQuestion(index) {
+      const q = questions[index];
+      questionEl.textContent = q.text;
+      optionsEl.innerHTML = '';
+      q.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.textContent = opt.text;
+        btn.onclick = () => {
+          playSound();
+          if (opt.next !== undefined) {
+            renderQuestion(opt.next);
+          }
+        };
+        optionsEl.appendChild(btn);
+      });
+      if (q.options.length === 0) {
+        optionsEl.innerHTML = '<div class="final-message">💬 love you guys !!</div>';
+      }
+    }
+
+    renderQuestion(currentIndex);
+  </script>
+</body>
+</html>
